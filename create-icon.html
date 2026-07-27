@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>生成插件图标</title>
+  <style>
+    html, body { margin: 0; width: 128px; height: 128px; overflow: hidden; }
+    button, br { display: none; }
+  </style>
+</head>
+<body>
+  <canvas id="canvas" width="128" height="128"></canvas>
+  <br>
+  <button onclick="download()">下载图标</button>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    // 绘制背景
+    ctx.fillStyle = '#1976d2';
+    ctx.fillRect(0, 0, 128, 128);
+
+    // 绘制裁切框图标
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 8;
+
+    // 外框
+    ctx.strokeRect(20, 20, 88, 88);
+
+    // 裁切角标记
+    ctx.beginPath();
+    ctx.moveTo(35, 35);
+    ctx.lineTo(20, 35);
+    ctx.lineTo(20, 50);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(93, 35);
+    ctx.lineTo(108, 35);
+    ctx.lineTo(108, 50);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(35, 93);
+    ctx.lineTo(20, 93);
+    ctx.lineTo(20, 78);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(93, 93);
+    ctx.lineTo(108, 93);
+    ctx.lineTo(108, 78);
+    ctx.stroke();
+
+    function download() {
+      canvas.toBlob(blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'icon.png';
+        a.click();
+        URL.revokeObjectURL(url);
+      });
+    }
+  </script>
+</body>
+</html>

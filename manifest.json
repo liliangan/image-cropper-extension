@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "图片裁切工具",
+  "version": "1.1.0",
+  "description": "支持常见证件照尺寸并保持原图片格式的裁切工具",
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon.png",
+      "48": "icon.png",
+      "128": "icon.png"
+    }
+  },
+  "icons": {
+    "16": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  }
+}

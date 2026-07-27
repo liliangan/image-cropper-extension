@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>图片裁切工具</title>
+  <link rel="stylesheet" href="popup.css">
+  <link rel="stylesheet" href="vendor/cropper.min.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h2>图片裁切工具</h2>
+    </div>
+
+    <div class="upload-section" id="uploadSection">
+      <input type="file" id="imageInput" accept="image/jpeg,image/png,image/webp" style="display: none;">
+      <button id="uploadBtn" class="btn btn-primary">选择图片</button>
+      <p class="hint">支持 JPG、PNG、WebP 格式，导出时保持原格式</p>
+    </div>
+
+    <div class="crop-section" id="cropSection" style="display: none;">
+      <div class="image-container">
+        <img id="image" src="" alt="待裁切图片">
+      </div>
+
+      <div class="controls">
+        <div class="ratio-buttons">
+          <h3>证件照尺寸 <span>按 300 DPI 换算</span></h3>
+          <div class="btn-group preset-group">
+            <button class="btn btn-ratio" data-width="260" data-height="378">小一寸 <small>22×32 mm · 260×378 px</small></button>
+            <button class="btn btn-ratio" data-width="295" data-height="413">一寸 <small>25×35 mm · 295×413 px</small></button>
+            <button class="btn btn-ratio" data-width="390" data-height="567">大一寸 <small>33×48 mm · 390×567 px</small></button>
+            <button class="btn btn-ratio" data-width="413" data-height="531">小二寸 <small>35×45 mm · 413×531 px</small></button>
+            <button class="btn btn-ratio" data-width="413" data-height="579">二寸 <small>35×49 mm · 413×579 px</small></button>
+            <button class="btn btn-ratio" data-width="413" data-height="626">大二寸 <small>35×53 mm · 413×626 px</small></button>
+          </div>
+
+          <h3>常用比例</h3>
+          <div class="btn-group ratio-group">
+            <button class="btn btn-ratio" data-ratio="free">自由</button>
+            <button class="btn btn-ratio" data-ratio="1">1:1</button>
+            <button class="btn btn-ratio" data-ratio="1.333">4:3</button>
+            <button class="btn btn-ratio" data-ratio="1.777">16:9</button>
+            <button class="btn btn-ratio" data-ratio="0.5625">9:16</button>
+            <button class="btn btn-ratio" data-ratio="2">2:1</button>
+          </div>
+        </div>
+
+        <div class="action-buttons">
+          <button id="rotateLeftBtn" class="btn btn-secondary">↺ 左旋转</button>
+          <button id="rotateRightBtn" class="btn btn-secondary">↻ 右旋转</button>
+          <button id="flipHBtn" class="btn btn-secondary">⇄ 水平翻转</button>
+          <button id="flipVBtn" class="btn btn-secondary">⇅ 垂直翻转</button>
+        </div>
+
+        <div class="download-section">
+          <button id="downloadBtn" class="btn btn-success">下载裁切图片</button>
+          <button id="resetBtn" class="btn btn-secondary">重新选择</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="vendor/cropper.min.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
