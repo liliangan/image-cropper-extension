@@ -2,11 +2,10 @@ let cropper = null;
 let currentImage = null;
 let currentFile = null;
 let selectedPreset = null;
-let customOutputSize = null;
 let scaleX = 1;
 let scaleY = 1;
 let cropSyncFrame = null;
-let customSizeApplyTimer = null;
+let customRatioApplyTimer = null;
 let downloadInProgress = false;
 
 const imageInput = document.getElementById('imageInput');
@@ -23,14 +22,15 @@ const rotateRightBtn = document.getElementById('rotateRightBtn');
 const flipHBtn = document.getElementById('flipHBtn');
 const flipVBtn = document.getElementById('flipVBtn');
 const ratioButtons = document.querySelectorAll('.btn-ratio');
-const freeRatioButton = document.querySelector('[data-ratio="free"]');
-const freeSizePanel = document.getElementById('freeSizePanel');
-const cropWidthInput = document.getElementById('cropWidthInput');
-const cropHeightInput = document.getElementById('cropHeightInput');
+const freeRatioButton = document.getElementById('freeRatioButton');
+const fixedRatioButton = document.getElementById('fixedRatioButton');
+const customRatioInputs = document.getElementById('customRatioInputs');
+const customRatioWidthInput = document.getElementById('customRatioWidthInput');
+const customRatioHeightInput = document.getElementById('customRatioHeightInput');
 const sizeError = document.getElementById('sizeError');
 const cropModeLabel = document.getElementById('cropModeLabel');
 const cropSizeBadge = document.getElementById('cropSizeBadge');
-const sizeInputs = [cropWidthInput, cropHeightInput];
+const sizeInputs = [customRatioWidthInput, customRatioHeightInput];
 
 function openImagePicker() {
   imageInput.value = '';
@@ -58,7 +58,7 @@ function handleImageUpload(file) {
   const reader = new FileReader();
 
   reader.onload = (event) => {
-    cancelPendingSizeApply();
+    cancelPendingCustomRatioApply();
     if (cropSyncFrame !== null) {
       window.cancelAnimationFrame(cropSyncFrame);
       cropSyncFrame = null;
@@ -127,19 +127,8 @@ function syncCropSize(cropData) {
 
   if (selectedPreset) {
     cropSizeBadge.textContent = `${selectedPreset.width} × ${selectedPreset.height} px 导出`;
-  } else if (customOutputSize) {
-    cropSizeBadge.textContent = `${customOutputSize.width} × ${customOutputSize.height} px 导出`;
   } else {
     cropSizeBadge.textContent = `${width} × ${height} px`;
-  }
-
-  if (!freeSizePanel.hidden) {
-    if (document.activeElement !== cropWidthInput) {
-      cropWidthInput.value = customOutputSize ? customOutputSize.width : width;
-    }
-    if (document.activeElement !== cropHeightInput) {
-      cropHeightInput.value = customOutputSize ? customOutputSize.height : height;
-    }
   }
 }
 
@@ -156,10 +145,43 @@ function getModeName(button) {
   return label ? label.textContent.trim() : button.textContent.trim();
 }
 
-function selectCropMode(button, updateCropper = true) {
-  setActiveRatioButton(button);
+function setFreeAspectRatioPreservingCropBox() {
+  if (!cropper) return;
+
+  const cropBoxData = cropper.getCropBoxData();
+  cropper.setAspectRatio(NaN);
+
+  if (
+    Number.isFinite(cropBoxData.width)
+    && Number.isFinite(cropBoxData.height)
+    && cropBoxData.width > 0
+    && cropBoxData.height > 0
+  ) {
+    cropper.setCropBoxData(cropBoxData);
+  }
+}
+
+function clearCustomRatioInputs() {
+  cancelPendingCustomRatioApply();
+  customRatioWidthInput.value = '';
+  customRatioHeightInput.value = '';
   clearSizeError();
-  customOutputSize = null;
+}
+
+function activateFreeModePreservingCustomRatio() {
+  selectedPreset = null;
+  setActiveRatioButton(freeRatioButton);
+  cropModeLabel.textContent = '自由裁切';
+
+  if (cropper) {
+    setFreeAspectRatioPreservingCropBox();
+    scheduleCropSizeSync(cropper.getData());
+  }
+}
+
+function selectCropMode(button, updateCropper = true) {
+  clearCustomRatioInputs();
+  setActiveRatioButton(button);
 
   const presetWidth = Number(button.dataset.width);
   const presetHeight = Number(button.dataset.height);
@@ -170,7 +192,6 @@ function selectCropMode(button, updateCropper = true) {
   selectedPreset = hasPreset
     ? { width: presetWidth, height: presetHeight }
     : null;
-  freeSizePanel.hidden = !isFree;
 
   if (hasPreset) {
     cropModeLabel.textContent = `${modeName} · 证件照`;
@@ -183,16 +204,36 @@ function selectCropMode(button, updateCropper = true) {
 
   if (!cropper || !updateCropper) return;
 
+  if (isFree) {
+    setFreeAspectRatioPreservingCropBox();
+    scheduleCropSizeSync(cropper.getData());
+    return;
+  }
+
   const ratio = hasPreset
     ? presetWidth / presetHeight
     : button.dataset.ratio;
-  cropper.setAspectRatio(isFree ? NaN : Number(ratio));
+  cropper.setAspectRatio(Number(ratio));
   scheduleCropSizeSync(cropper.getData());
 }
 
 ratioButtons.forEach((button) => {
   button.addEventListener('click', () => {
-    cancelPendingSizeApply();
+    cancelPendingCustomRatioApply();
+
+    if (button === fixedRatioButton) {
+      const widthText = customRatioWidthInput.value.trim();
+      const heightText = customRatioHeightInput.value.trim();
+
+      if (widthText && heightText) {
+        applyCustomRatio();
+      } else {
+        const inputToFocus = widthText ? customRatioHeightInput : customRatioWidthInput;
+        window.requestAnimationFrame(() => inputToFocus.focus());
+      }
+      return;
+    }
+
     selectCropMode(button);
   });
 });
@@ -209,28 +250,39 @@ function clearSizeError() {
   sizeInputs.forEach((input) => input.removeAttribute('aria-invalid'));
 }
 
-function cancelPendingSizeApply() {
-  if (customSizeApplyTimer !== null) {
-    window.clearTimeout(customSizeApplyTimer);
-    customSizeApplyTimer = null;
+function cancelPendingCustomRatioApply() {
+  if (customRatioApplyTimer !== null) {
+    window.clearTimeout(customRatioApplyTimer);
+    customRatioApplyTimer = null;
   }
 }
 
-function scheduleCustomSizeApply() {
-  cancelPendingSizeApply();
-  customSizeApplyTimer = window.setTimeout(() => {
-    customSizeApplyTimer = null;
-    applyCustomSize();
+function scheduleCustomRatioApply() {
+  cancelPendingCustomRatioApply();
+  customRatioApplyTimer = window.setTimeout(() => {
+    customRatioApplyTimer = null;
+    applyCustomRatio();
   }, 300);
 }
 
-function applyCustomSize() {
-  if (!cropper) return;
+function applyCustomRatio() {
+  if (!cropper) return false;
 
-  cancelPendingSizeApply();
+  cancelPendingCustomRatioApply();
 
-  const widthValue = Number(cropWidthInput.value);
-  const heightValue = Number(cropHeightInput.value);
+  const widthText = customRatioWidthInput.value.trim();
+  const heightText = customRatioHeightInput.value.trim();
+
+  if (!widthText || !heightText) {
+    clearSizeError();
+    if (fixedRatioButton.classList.contains('active')) {
+      activateFreeModePreservingCustomRatio();
+    }
+    return false;
+  }
+
+  const widthValue = Number(widthText);
+  const heightValue = Number(heightText);
 
   if (
     !Number.isInteger(widthValue)
@@ -238,37 +290,38 @@ function applyCustomSize() {
     || widthValue < 1
     || heightValue < 1
   ) {
-    showSizeError('请输入大于 0 的整数像素尺寸。');
-    return;
-  }
-
-  if (widthValue > 4096 || heightValue > 4096) {
-    showSizeError('导出尺寸的宽高不能超过 4096 px。');
-    return;
+    showSizeError('请输入大于 0 的整数像素值，用于设定比例。');
+    if (fixedRatioButton.classList.contains('active')) {
+      activateFreeModePreservingCustomRatio();
+    }
+    return false;
   }
 
   clearSizeError();
-  selectCropMode(freeRatioButton);
-  customOutputSize = { width: widthValue, height: heightValue };
+  selectedPreset = null;
+  setActiveRatioButton(fixedRatioButton);
   cropper.setAspectRatio(widthValue / heightValue);
-  cropModeLabel.textContent = '自由裁切 · 自定义输出';
-  cropSizeBadge.textContent = `${widthValue} × ${heightValue} px 导出`;
 
-  cropWidthInput.value = String(widthValue);
-  cropHeightInput.value = String(heightValue);
-  window.requestAnimationFrame(() => syncCropSize(cropper.getData()));
+  let first = widthValue;
+  let second = heightValue;
+  while (second !== 0) {
+    [first, second] = [second, first % second];
+  }
+  cropModeLabel.textContent = `固定比例 · ${widthValue / first}:${heightValue / first}`;
+  scheduleCropSizeSync(cropper.getData());
+  return true;
 }
 
 sizeInputs.forEach((input) => {
   input.addEventListener('input', () => {
     clearSizeError();
-    scheduleCustomSizeApply();
+    scheduleCustomRatioApply();
   });
-  input.addEventListener('change', applyCustomSize);
+  input.addEventListener('change', applyCustomRatio);
   input.addEventListener('keydown', (event) => {
     if (event.key === 'Enter') {
       event.preventDefault();
-      applyCustomSize();
+      applyCustomRatio();
     }
   });
 });
@@ -317,10 +370,9 @@ downloadBtn.addEventListener('click', () => {
     imageSmoothingQuality: 'high',
   };
 
-  const outputSize = selectedPreset || customOutputSize;
-  if (outputSize) {
-    canvasOptions.width = outputSize.width;
-    canvasOptions.height = outputSize.height;
+  if (selectedPreset) {
+    canvasOptions.width = selectedPreset.width;
+    canvasOptions.height = selectedPreset.height;
   }
   if (currentFile.type === 'image/jpeg') {
     canvasOptions.fillColor = '#fff';
@@ -375,14 +427,10 @@ downloadBtn.addEventListener('click', () => {
 
 function resetCropMode() {
   selectedPreset = null;
-  customOutputSize = null;
   scaleX = 1;
   scaleY = 1;
-  freeSizePanel.hidden = false;
+  clearCustomRatioInputs();
   cropModeLabel.textContent = '自由裁切';
   cropSizeBadge.textContent = '准备中';
-  cropWidthInput.value = '';
-  cropHeightInput.value = '';
-  clearSizeError();
   setActiveRatioButton(freeRatioButton);
 }

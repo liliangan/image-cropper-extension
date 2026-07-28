@@ -110,7 +110,7 @@
               <p class="section-kicker">SIZE &amp; RATIO</p>
               <h2 id="sizeSectionTitle">裁切规格</h2>
             </div>
-            <p>选择预设，或精确输入像素</p>
+            <p>选择预设或自定义比例</p>
           </div>
 
           <div class="control-block">
@@ -149,43 +149,46 @@
           <div class="control-block">
             <div class="label-row">
               <h3>常用比例</h3>
-              <span>自由模式支持拖拽与输入</span>
+              <span>自由裁切或快速比例</span>
             </div>
-            <div class="btn-group ratio-group">
-              <button type="button" class="btn btn-ratio active" data-ratio="free" aria-pressed="true"><span>自由</span></button>
+            <div class="btn-group ratio-presets">
+              <button type="button" class="btn btn-ratio active" id="freeRatioButton" data-ratio="free" aria-pressed="true"><span>自由</span></button>
               <button type="button" class="btn btn-ratio" data-ratio="1" aria-pressed="false"><span>1:1</span></button>
               <button type="button" class="btn btn-ratio" data-ratio="1.3333333333" aria-pressed="false"><span>4:3</span></button>
               <button type="button" class="btn btn-ratio" data-ratio="1.7777777778" aria-pressed="false"><span>16:9</span></button>
-              <button type="button" class="btn btn-ratio" data-ratio="0.5625" aria-pressed="false"><span>9:16</span></button>
-              <button type="button" class="btn btn-ratio" data-ratio="2" aria-pressed="false"><span>2:1</span></button>
             </div>
           </div>
 
-          <div class="size-editor" id="freeSizePanel">
-            <div class="size-editor-heading">
-              <div>
-                <strong>自由尺寸</strong>
-                <span>拖拽调整取景，输入设置导出尺寸</span>
+          <div class="control-block fixed-ratio-block">
+            <div class="fixed-ratio-row">
+              <button type="button" class="btn btn-ratio ratio-mode-button" id="fixedRatioButton" data-ratio="fixed" aria-pressed="false" aria-controls="customRatioInputs">
+                <svg class="ratio-mode-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <rect x="6.5" y="10.5" width="11" height="9" rx="2" />
+                  <path d="M9 10.5V8a3 3 0 0 1 6 0v2.5" />
+                </svg>
+                <span>固定比例</span>
+              </button>
+              <div class="custom-ratio-inputs" id="customRatioInputs" aria-label="固定比例宽高">
+                <div class="custom-ratio-fields">
+                  <label class="custom-ratio-field" for="customRatioWidthInput">
+                    <span>宽</span>
+                    <span class="number-input">
+                      <input id="customRatioWidthInput" type="number" min="1" step="1" inputmode="numeric" autocomplete="off" aria-describedby="sizeError">
+                      <span>px</span>
+                    </span>
+                  </label>
+                  <span class="size-separator" aria-hidden="true">×</span>
+                  <label class="custom-ratio-field" for="customRatioHeightInput">
+                    <span>高</span>
+                    <span class="number-input">
+                      <input id="customRatioHeightInput" type="number" min="1" step="1" inputmode="numeric" autocomplete="off" aria-describedby="sizeError">
+                      <span>px</span>
+                    </span>
+                  </label>
+                </div>
+                <p class="size-error" id="sizeError" role="alert" hidden></p>
               </div>
             </div>
-            <div class="size-controls">
-              <label class="size-field" for="cropWidthInput">
-                <span>宽度</span>
-                <span class="number-input">
-                  <input id="cropWidthInput" type="number" min="1" max="4096" step="1" inputmode="numeric" autocomplete="off" aria-describedby="sizeError">
-                  <span>px</span>
-                </span>
-              </label>
-              <span class="size-separator" aria-hidden="true">×</span>
-              <label class="size-field" for="cropHeightInput">
-                <span>高度</span>
-                <span class="number-input">
-                  <input id="cropHeightInput" type="number" min="1" max="4096" step="1" inputmode="numeric" autocomplete="off" aria-describedby="sizeError">
-                  <span>px</span>
-                </span>
-              </label>
-            </div>
-            <p class="size-error" id="sizeError" role="alert" hidden></p>
           </div>
         </section>
       </div>

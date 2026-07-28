@@ -439,8 +439,19 @@ button {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-.ratio-group {
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+.ratio-presets {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.control-block.fixed-ratio-block {
+  margin-top: 10px;
+}
+
+.fixed-ratio-row {
+  display: grid;
+  align-items: start;
+  grid-template-columns: minmax(112px, 0.85fr) minmax(0, 2.6fr);
+  gap: 8px;
 }
 
 .btn {
@@ -575,60 +586,53 @@ button {
   color: #5f61a6;
 }
 
-.ratio-group .btn {
+.ratio-presets .btn,
+.fixed-ratio-row .btn {
   padding: 8px 6px;
   font-family: "SFMono-Regular", "Roboto Mono", Consolas, monospace;
   font-size: 12px;
   font-variant-numeric: tabular-nums;
 }
 
-.ratio-group .btn:first-child {
+#freeRatioButton,
+.ratio-mode-button {
   font-family: inherit;
 }
 
-.size-editor {
-  margin-top: 14px;
-  padding: 14px;
-  border: 1px solid var(--primary-border);
-  border-radius: var(--radius-md);
-  background: var(--primary-soft);
+.ratio-mode-icon {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
 }
 
-.size-editor-heading {
-  display: flex;
-  margin-bottom: 12px;
-  align-items: center;
-  gap: 16px;
-}
-
-.size-editor-heading > div {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-}
-
-.size-editor-heading strong {
-  color: var(--ink);
-  font-size: 12px;
-}
-
-.size-editor-heading span {
-  color: var(--muted);
-  font-size: 10px;
-}
-
-.size-controls {
+.custom-ratio-inputs {
   display: grid;
-  align-items: end;
+  min-width: 0;
+  align-items: center;
+  gap: 4px;
+}
+
+.custom-ratio-inputs[hidden] {
+  display: none;
+}
+
+.custom-ratio-fields {
+  display: grid;
+  align-items: center;
   grid-template-columns: minmax(0, 1fr) 18px minmax(0, 1fr);
   gap: 8px;
 }
 
-.size-field {
-  display: flex;
+.custom-ratio-field {
+  display: grid;
   min-width: 0;
-  flex-direction: column;
-  gap: 5px;
+  align-items: center;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 6px;
   color: var(--muted);
   font-size: 10px;
   font-weight: 650;
@@ -693,14 +697,10 @@ button {
 }
 
 .size-error {
-  margin-top: 8px;
-  font-size: 10px;
-  line-height: 1.4;
-}
-
-.size-error {
   color: var(--danger);
+  font-size: 10px;
   font-weight: 600;
+  line-height: 1.4;
 }
 
 /* Cropper.js uses a 20px southeast handle below 768px. Keep its hit area,
@@ -854,17 +854,15 @@ button {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .ratio-group {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+  .ratio-presets {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
-  .size-editor-heading > div {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 1px;
+  .fixed-ratio-row {
+    grid-template-columns: 108px minmax(0, 1fr);
   }
 
-  .size-controls {
+  .custom-ratio-fields {
     grid-template-columns: minmax(0, 1fr) 18px minmax(0, 1fr);
   }
 
