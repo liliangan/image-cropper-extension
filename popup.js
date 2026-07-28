@@ -10,13 +10,14 @@ let imageInitFrame = null;
 let imageLoadToken = 0;
 let customRatioApplyTimer = null;
 let downloadInProgress = false;
+let editorHasImage = false;
 
 const imageInput = document.getElementById('imageInput');
-const uploadBtn = document.getElementById('uploadBtn');
-const uploadSection = document.getElementById('uploadSection');
-const cropSection = document.getElementById('cropSection');
-const headerActions = document.getElementById('headerActions');
 const image = document.getElementById('image');
+const imageContainer = document.getElementById('imageContainer');
+const canvasEmptyState = document.getElementById('canvasEmptyState');
+const canvasEmptyStateTitle = document.getElementById('canvasEmptyStateTitle');
+const canvasEmptyStateLabel = document.getElementById('canvasEmptyStateLabel');
 const downloadBtn = document.getElementById('downloadBtn');
 const downloadBtnLabel = document.getElementById('downloadBtnLabel');
 const uploadNewBtn = document.getElementById('uploadNewBtn');
@@ -34,6 +35,7 @@ const sizeError = document.getElementById('sizeError');
 const cropModeLabel = document.getElementById('cropModeLabel');
 const cropSizeBadge = document.getElementById('cropSizeBadge');
 const sizeInputs = [customRatioWidthInput, customRatioHeightInput];
+const canvasToolButtons = [rotateLeftBtn, rotateRightBtn, flipHBtn, flipVBtn];
 const cropResizeActions = new Set(['e', 'w', 's', 'n', 'ne', 'nw', 'se', 'sw']);
 
 function openImagePicker() {
@@ -41,7 +43,6 @@ function openImagePicker() {
   imageInput.click();
 }
 
-uploadBtn.addEventListener('click', openImagePicker);
 uploadNewBtn.addEventListener('click', openImagePicker);
 
 imageInput.addEventListener('change', (event) => {
@@ -61,38 +62,94 @@ function handleImageUpload(file) {
 
   const loadToken = ++imageLoadToken;
   cancelPendingImageInitialization();
+  cancelPendingCustomRatioApply();
+  cancelPendingCropCentering();
+  if (cropSyncFrame !== null) {
+    window.cancelAnimationFrame(cropSyncFrame);
+    cropSyncFrame = null;
+  }
+  if (cropper) {
+    cropper.destroy();
+    cropper = null;
+  }
+
+  currentFile = null;
+  currentImage = null;
+  image.removeAttribute('src');
+  resetCropMode();
+  setDownloadState(false);
+  setEditorState('loading');
+
   const reader = new FileReader();
 
   reader.onload = (event) => {
     if (loadToken !== imageLoadToken) return;
 
-    cancelPendingCustomRatioApply();
-    cancelPendingCropCentering();
-    if (cropSyncFrame !== null) {
-      window.cancelAnimationFrame(cropSyncFrame);
-      cropSyncFrame = null;
-    }
-    setDownloadState(false);
-    if (cropper) {
-      cropper.destroy();
-      cropper = null;
-    }
     currentFile = file;
     currentImage = event.target.result;
-    uploadSection.hidden = true;
-    cropSection.hidden = false;
-    headerActions.hidden = false;
-    resetCropMode();
+    image.alt = `${file.name} 的裁切预览`;
     loadImageBeforeCropper(currentImage, loadToken);
   };
 
   reader.onerror = () => {
     if (loadToken !== imageLoadToken) return;
-    imageInput.value = '';
-    window.alert('图片读取失败，请重新选择文件。');
+    resetEditorAfterImageError('图片读取失败，请重新选择文件。');
   };
 
   reader.readAsDataURL(file);
+}
+
+function setEditorState(state) {
+  const isReady = state === 'ready';
+  editorHasImage = isReady;
+  imageContainer.dataset.state = state;
+  canvasEmptyState.hidden = isReady;
+
+  const controlsDisabled = !isReady;
+  canvasToolButtons.forEach((button) => {
+    button.disabled = controlsDisabled;
+  });
+  ratioButtons.forEach((button) => {
+    button.disabled = controlsDisabled;
+  });
+  sizeInputs.forEach((input) => {
+    input.disabled = controlsDisabled;
+  });
+
+  if (state === 'loading') {
+    canvasEmptyStateTitle.textContent = '正在加载图片…';
+    canvasEmptyStateLabel.textContent = '正在准备裁切画布';
+    cropModeLabel.textContent = '加载中';
+    cropSizeBadge.textContent = '加载中…';
+  } else if (state === 'ready') {
+    cropModeLabel.textContent = '自由裁切';
+  } else if (state === 'empty') {
+    canvasEmptyStateTitle.textContent = '还没有图片';
+    canvasEmptyStateLabel.textContent = '点击右上角“上传”选择 JPG、PNG 或 WebP';
+    cropModeLabel.textContent = '等待图片';
+    cropSizeBadge.textContent = '未选择图片';
+  }
+
+  downloadBtn.disabled = !editorHasImage || downloadInProgress;
+}
+
+function resetEditorAfterImageError(message) {
+  cancelPendingImageInitialization();
+  cancelPendingCropCentering();
+  if (cropper) {
+    cropper.destroy();
+    cropper = null;
+  }
+
+  currentFile = null;
+  currentImage = null;
+  imageInput.value = '';
+  image.removeAttribute('src');
+  image.alt = '待裁切图片';
+  resetCropMode();
+  setDownloadState(false);
+  setEditorState('empty');
+  window.alert(message);
 }
 
 function cancelPendingImageInitialization() {
@@ -124,7 +181,7 @@ function loadImageBeforeCropper(imageUrl, loadToken) {
       imageInitFrame = window.requestAnimationFrame(() => {
         imageInitFrame = null;
         if (loadToken === imageLoadToken) {
-          initCropper();
+          initCropper(loadToken);
         }
       });
     });
@@ -138,14 +195,7 @@ function loadImageBeforeCropper(imageUrl, loadToken) {
     imageReady = true;
     image.onload = null;
     image.onerror = null;
-    currentFile = null;
-    currentImage = null;
-    imageInput.value = '';
-    image.removeAttribute('src');
-    uploadSection.hidden = false;
-    cropSection.hidden = true;
-    headerActions.hidden = true;
-    window.alert('图片解码失败，请重新选择图片。');
+    resetEditorAfterImageError('图片解码失败，请重新选择图片。');
   };
 
   image.src = imageUrl;
@@ -176,7 +226,7 @@ function selectFullImage() {
   syncCropSize(cropper.getData());
 }
 
-function initCropper() {
+function initCropper(loadToken) {
   if (cropper) {
     cropper.destroy();
   }
@@ -194,7 +244,9 @@ function initCropper() {
     cropBoxResizable: true,
     toggleDragModeOnDblclick: false,
     ready() {
+      if (loadToken !== imageLoadToken) return;
       selectFullImage();
+      setEditorState('ready');
     },
     crop(event) {
       scheduleCropSizeSync(event.detail);
@@ -511,12 +563,13 @@ flipVBtn.addEventListener('click', () => {
 
 function setDownloadState(isLoading) {
   downloadInProgress = isLoading;
-  downloadBtn.disabled = isLoading;
+  downloadBtn.disabled = !editorHasImage || isLoading;
+  downloadBtn.classList.toggle('is-loading', isLoading);
   downloadBtnLabel.textContent = isLoading ? '导出中…' : '下载';
 }
 
 downloadBtn.addEventListener('click', () => {
-  if (!cropper || !currentFile || downloadInProgress) return;
+  if (!editorHasImage || !cropper || !currentFile || downloadInProgress) return;
 
   setDownloadState(true);
 
@@ -592,3 +645,5 @@ function resetCropMode() {
   cropSizeBadge.textContent = '准备中';
   setActiveRatioButton(freeRatioButton);
 }
+
+setEditorState('empty');

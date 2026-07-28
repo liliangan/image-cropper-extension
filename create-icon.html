@@ -17,40 +17,37 @@
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
 
-    // 绘制背景
-    ctx.fillStyle = '#1976d2';
-    ctx.fillRect(0, 0, 128, 128);
+    const background = ctx.createLinearGradient(22, 12, 106, 116);
+    background.addColorStop(0, '#222c43');
+    background.addColorStop(1, '#111827');
 
-    // 绘制裁切框图标
+    ctx.beginPath();
+    ctx.roundRect(6, 6, 116, 116, 29);
+    ctx.fillStyle = background;
+    ctx.fill();
+
+    ctx.lineWidth = 10;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    ctx.beginPath();
+    ctx.moveTo(36, 22);
+    ctx.lineTo(36, 80);
+    ctx.quadraticCurveTo(36, 92, 48, 92);
+    ctx.lineTo(106, 92);
     ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 8;
-
-    // 外框
-    ctx.strokeRect(20, 20, 88, 88);
-
-    // 裁切角标记
-    ctx.beginPath();
-    ctx.moveTo(35, 35);
-    ctx.lineTo(20, 35);
-    ctx.lineTo(20, 50);
     ctx.stroke();
 
-    ctx.beginPath();
-    ctx.moveTo(93, 35);
-    ctx.lineTo(108, 35);
-    ctx.lineTo(108, 50);
-    ctx.stroke();
+    const accent = ctx.createLinearGradient(25, 34, 99, 103);
+    accent.addColorStop(0, '#aeb3ff');
+    accent.addColorStop(1, '#746eff');
 
     ctx.beginPath();
-    ctx.moveTo(35, 93);
-    ctx.lineTo(20, 93);
-    ctx.lineTo(20, 78);
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(93, 93);
-    ctx.lineTo(108, 93);
-    ctx.lineTo(108, 78);
+    ctx.moveTo(22, 36);
+    ctx.lineTo(80, 36);
+    ctx.quadraticCurveTo(92, 36, 92, 48);
+    ctx.lineTo(92, 106);
+    ctx.strokeStyle = accent;
     ctx.stroke();
 
     function download() {

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="icon-title">
+  <title id="icon-title">图片裁切工具</title>
+  <defs>
+    <linearGradient id="icon-background" x1="22" y1="12" x2="106" y2="116" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#222c43" />
+      <stop offset="1" stop-color="#111827" />
+    </linearGradient>
+    <linearGradient id="icon-accent" x1="25" y1="34" x2="99" y2="103" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#aeb3ff" />
+      <stop offset="1" stop-color="#746eff" />
+    </linearGradient>
+  </defs>
+  <rect x="6" y="6" width="116" height="116" rx="29" fill="url(#icon-background)" />
+  <path d="M36 22v58c0 8 4 12 12 12h58" fill="none" stroke="#ffffff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
+  <path d="M22 36h58c8 0 12 4 12 12v58" fill="none" stroke="url(#icon-accent)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" />
+</svg>
