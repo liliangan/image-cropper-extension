@@ -4,63 +4,193 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>图片裁切工具</title>
-  <link rel="stylesheet" href="popup.css">
   <link rel="stylesheet" href="vendor/cropper.min.css">
+  <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <h2>图片裁切工具</h2>
-    </div>
+  <main class="app-shell">
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M7 3v14a2 2 0 0 0 2 2h12" />
+            <path d="M3 7h14a2 2 0 0 1 2 2v12" />
+            <path d="M3 3v5h5M21 21v-5h-5" />
+          </svg>
+        </div>
+        <div>
+          <p class="brand-kicker">PIXEL CROP</p>
+          <h1>图片裁切工具</h1>
+        </div>
+      </div>
+      <div class="header-actions" id="headerActions" hidden>
+        <button type="button" id="downloadBtn" class="btn btn-primary header-action">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 4v12m0 0 4.5-4.5M12 16l-4.5-4.5" />
+            <path d="M5 19.5h14" />
+          </svg>
+          <span id="downloadBtnLabel">下载</span>
+        </button>
+        <button type="button" id="uploadNewBtn" class="btn header-action header-action-secondary">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5" />
+            <path d="M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4" />
+          </svg>
+          <span>上传</span>
+        </button>
+      </div>
+    </header>
 
-    <div class="upload-section" id="uploadSection">
-      <input type="file" id="imageInput" accept="image/jpeg,image/png,image/webp" style="display: none;">
-      <button id="uploadBtn" class="btn btn-primary">选择图片</button>
-      <p class="hint">支持 JPG、PNG、WebP 格式，导出时保持原格式</p>
-    </div>
+    <input class="visually-hidden" type="file" id="imageInput" accept="image/jpeg,image/png,image/webp">
 
-    <div class="crop-section" id="cropSection" style="display: none;">
-      <div class="image-container">
-        <img id="image" src="" alt="待裁切图片">
+    <section class="upload-section" id="uploadSection" aria-labelledby="uploadTitle">
+      <div class="upload-visual" aria-hidden="true">
+        <svg viewBox="0 0 48 48" fill="none">
+          <rect x="8" y="8" width="32" height="32" rx="8" />
+          <path d="M15 32.5 21.5 26l5 5 3.5-3.5 3 3" />
+          <circle cx="30.5" cy="18.5" r="3" />
+          <path d="M24 2v7M20.5 5.5h7" />
+        </svg>
+      </div>
+      <p class="section-kicker">开始裁切</p>
+      <h2 id="uploadTitle">选择一张图片</h2>
+      <p class="upload-description">精准调整画面比例与像素尺寸，处理过程仅在本地完成。</p>
+      <button type="button" id="uploadBtn" class="btn btn-primary upload-button">
+        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5" />
+          <path d="M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4" />
+        </svg>
+        选择图片
+      </button>
+      <p class="hint">支持 JPG、PNG、WebP · 下载时保留原格式</p>
+    </section>
+
+    <section class="crop-section" id="cropSection" aria-label="图片裁切编辑器" hidden>
+      <div class="workspace-card">
+        <div class="workspace-meta">
+          <div class="workspace-title">
+            <span class="workspace-kicker">编辑画布</span>
+            <strong id="cropModeLabel">自由裁切</strong>
+          </div>
+          <div class="workspace-tools">
+            <div class="canvas-actions" aria-label="画面调整">
+              <button type="button" id="rotateLeftBtn" class="canvas-tool-button" aria-label="左旋转" title="左旋转">
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M4 9V4m0 0h5M4 4l3.8 3.8A7 7 0 1 1 5.4 15" />
+                </svg>
+              </button>
+              <button type="button" id="rotateRightBtn" class="canvas-tool-button" aria-label="右旋转" title="右旋转">
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M20 9V4m0 0h-5m5-1-3.8 3.8A7 7 0 1 0 18.6 15" />
+                </svg>
+              </button>
+              <button type="button" id="flipHBtn" class="canvas-tool-button" aria-label="水平翻转" title="水平翻转">
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M12 3v18M9.5 6 4 12l5.5 6V6Zm5 0 5.5 6-5.5 6V6Z" />
+                </svg>
+              </button>
+              <button type="button" id="flipVBtn" class="canvas-tool-button" aria-label="垂直翻转" title="垂直翻转">
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M3 12h18M6 9.5 12 4l6 5.5H6Zm0 5L12 20l6-5.5H6Z" />
+                </svg>
+              </button>
+            </div>
+            <output id="cropSizeBadge" class="size-badge" aria-live="polite">准备中</output>
+          </div>
+        </div>
+        <div class="image-container">
+          <img id="image" src="" alt="待裁切图片">
+        </div>
       </div>
 
       <div class="controls">
-        <div class="ratio-buttons">
-          <h3>证件照尺寸 <span>按 300 DPI 换算</span></h3>
-          <div class="btn-group preset-group">
-            <button class="btn btn-ratio" data-width="260" data-height="378">小一寸 <small>22×32 mm · 260×378 px</small></button>
-            <button class="btn btn-ratio" data-width="295" data-height="413">一寸 <small>25×35 mm · 295×413 px</small></button>
-            <button class="btn btn-ratio" data-width="390" data-height="567">大一寸 <small>33×48 mm · 390×567 px</small></button>
-            <button class="btn btn-ratio" data-width="413" data-height="531">小二寸 <small>35×45 mm · 413×531 px</small></button>
-            <button class="btn btn-ratio" data-width="413" data-height="579">二寸 <small>35×49 mm · 413×579 px</small></button>
-            <button class="btn btn-ratio" data-width="413" data-height="626">大二寸 <small>35×53 mm · 413×626 px</small></button>
+        <section class="control-section" aria-labelledby="sizeSectionTitle">
+          <div class="section-heading">
+            <div>
+              <p class="section-kicker">SIZE &amp; RATIO</p>
+              <h2 id="sizeSectionTitle">裁切规格</h2>
+            </div>
+            <p>选择预设，或精确输入像素</p>
           </div>
 
-          <h3>常用比例</h3>
-          <div class="btn-group ratio-group">
-            <button class="btn btn-ratio" data-ratio="free">自由</button>
-            <button class="btn btn-ratio" data-ratio="1">1:1</button>
-            <button class="btn btn-ratio" data-ratio="1.333">4:3</button>
-            <button class="btn btn-ratio" data-ratio="1.777">16:9</button>
-            <button class="btn btn-ratio" data-ratio="0.5625">9:16</button>
-            <button class="btn btn-ratio" data-ratio="2">2:1</button>
+          <div class="control-block">
+            <div class="label-row">
+              <h3>证件照尺寸</h3>
+              <span>按 300 DPI 换算</span>
+            </div>
+            <div class="btn-group preset-group">
+              <button type="button" class="btn btn-ratio" data-width="260" data-height="378" aria-pressed="false">
+                <span class="preset-name">小一寸</span>
+                <small>22×32 mm · 260×378 px</small>
+              </button>
+              <button type="button" class="btn btn-ratio" data-width="295" data-height="413" aria-pressed="false">
+                <span class="preset-name">一寸</span>
+                <small>25×35 mm · 295×413 px</small>
+              </button>
+              <button type="button" class="btn btn-ratio" data-width="390" data-height="567" aria-pressed="false">
+                <span class="preset-name">大一寸</span>
+                <small>33×48 mm · 390×567 px</small>
+              </button>
+              <button type="button" class="btn btn-ratio" data-width="413" data-height="531" aria-pressed="false">
+                <span class="preset-name">小二寸</span>
+                <small>35×45 mm · 413×531 px</small>
+              </button>
+              <button type="button" class="btn btn-ratio" data-width="413" data-height="579" aria-pressed="false">
+                <span class="preset-name">二寸</span>
+                <small>35×49 mm · 413×579 px</small>
+              </button>
+              <button type="button" class="btn btn-ratio" data-width="413" data-height="626" aria-pressed="false">
+                <span class="preset-name">大二寸</span>
+                <small>35×53 mm · 413×626 px</small>
+              </button>
+            </div>
           </div>
-        </div>
 
-        <div class="action-buttons">
-          <button id="rotateLeftBtn" class="btn btn-secondary">↺ 左旋转</button>
-          <button id="rotateRightBtn" class="btn btn-secondary">↻ 右旋转</button>
-          <button id="flipHBtn" class="btn btn-secondary">⇄ 水平翻转</button>
-          <button id="flipVBtn" class="btn btn-secondary">⇅ 垂直翻转</button>
-        </div>
+          <div class="control-block">
+            <div class="label-row">
+              <h3>常用比例</h3>
+              <span>自由模式支持拖拽与输入</span>
+            </div>
+            <div class="btn-group ratio-group">
+              <button type="button" class="btn btn-ratio active" data-ratio="free" aria-pressed="true"><span>自由</span></button>
+              <button type="button" class="btn btn-ratio" data-ratio="1" aria-pressed="false"><span>1:1</span></button>
+              <button type="button" class="btn btn-ratio" data-ratio="1.3333333333" aria-pressed="false"><span>4:3</span></button>
+              <button type="button" class="btn btn-ratio" data-ratio="1.7777777778" aria-pressed="false"><span>16:9</span></button>
+              <button type="button" class="btn btn-ratio" data-ratio="0.5625" aria-pressed="false"><span>9:16</span></button>
+              <button type="button" class="btn btn-ratio" data-ratio="2" aria-pressed="false"><span>2:1</span></button>
+            </div>
+          </div>
 
-        <div class="download-section">
-          <button id="downloadBtn" class="btn btn-success">下载裁切图片</button>
-          <button id="resetBtn" class="btn btn-secondary">重新选择</button>
-        </div>
+          <div class="size-editor" id="freeSizePanel">
+            <div class="size-editor-heading">
+              <div>
+                <strong>自由尺寸</strong>
+                <span>拖拽调整取景，输入设置导出尺寸</span>
+              </div>
+            </div>
+            <div class="size-controls">
+              <label class="size-field" for="cropWidthInput">
+                <span>宽度</span>
+                <span class="number-input">
+                  <input id="cropWidthInput" type="number" min="1" max="4096" step="1" inputmode="numeric" autocomplete="off" aria-describedby="sizeError">
+                  <span>px</span>
+                </span>
+              </label>
+              <span class="size-separator" aria-hidden="true">×</span>
+              <label class="size-field" for="cropHeightInput">
+                <span>高度</span>
+                <span class="number-input">
+                  <input id="cropHeightInput" type="number" min="1" max="4096" step="1" inputmode="numeric" autocomplete="off" aria-describedby="sizeError">
+                  <span>px</span>
+                </span>
+              </label>
+            </div>
+            <p class="size-error" id="sizeError" role="alert" hidden></p>
+          </div>
+        </section>
       </div>
-    </div>
-  </div>
+    </section>
+  </main>
 
   <script src="vendor/cropper.min.js"></script>
   <script src="popup.js"></script>
