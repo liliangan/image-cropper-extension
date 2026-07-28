@@ -5,6 +5,9 @@ let selectedPreset = null;
 let scaleX = 1;
 let scaleY = 1;
 let cropSyncFrame = null;
+let cropCenterFrame = null;
+let imageInitFrame = null;
+let imageLoadToken = 0;
 let customRatioApplyTimer = null;
 let downloadInProgress = false;
 
@@ -31,6 +34,7 @@ const sizeError = document.getElementById('sizeError');
 const cropModeLabel = document.getElementById('cropModeLabel');
 const cropSizeBadge = document.getElementById('cropSizeBadge');
 const sizeInputs = [customRatioWidthInput, customRatioHeightInput];
+const cropResizeActions = new Set(['e', 'w', 's', 'n', 'ne', 'nw', 'se', 'sw']);
 
 function openImagePicker() {
   imageInput.value = '';
@@ -55,31 +59,121 @@ function handleImageUpload(file) {
     return;
   }
 
+  const loadToken = ++imageLoadToken;
+  cancelPendingImageInitialization();
   const reader = new FileReader();
 
   reader.onload = (event) => {
+    if (loadToken !== imageLoadToken) return;
+
     cancelPendingCustomRatioApply();
+    cancelPendingCropCentering();
     if (cropSyncFrame !== null) {
       window.cancelAnimationFrame(cropSyncFrame);
       cropSyncFrame = null;
     }
     setDownloadState(false);
+    if (cropper) {
+      cropper.destroy();
+      cropper = null;
+    }
     currentFile = file;
     currentImage = event.target.result;
-    image.src = currentImage;
     uploadSection.hidden = true;
     cropSection.hidden = false;
     headerActions.hidden = false;
     resetCropMode();
-    initCropper();
+    loadImageBeforeCropper(currentImage, loadToken);
   };
 
   reader.onerror = () => {
+    if (loadToken !== imageLoadToken) return;
     imageInput.value = '';
     window.alert('图片读取失败，请重新选择文件。');
   };
 
   reader.readAsDataURL(file);
+}
+
+function cancelPendingImageInitialization() {
+  image.onload = null;
+  image.onerror = null;
+  if (imageInitFrame !== null) {
+    window.cancelAnimationFrame(imageInitFrame);
+    imageInitFrame = null;
+  }
+}
+
+function loadImageBeforeCropper(imageUrl, loadToken) {
+  let imageReady = false;
+
+  const initializeWhenLayoutIsReady = () => {
+    if (
+      imageReady
+      || loadToken !== imageLoadToken
+      || !image.naturalWidth
+      || !image.naturalHeight
+    ) {
+      return;
+    }
+
+    imageReady = true;
+    image.onload = null;
+    image.onerror = null;
+    imageInitFrame = window.requestAnimationFrame(() => {
+      imageInitFrame = window.requestAnimationFrame(() => {
+        imageInitFrame = null;
+        if (loadToken === imageLoadToken) {
+          initCropper();
+        }
+      });
+    });
+  };
+
+  image.removeAttribute('src');
+  image.onload = initializeWhenLayoutIsReady;
+  image.onerror = () => {
+    if (loadToken !== imageLoadToken) return;
+
+    imageReady = true;
+    image.onload = null;
+    image.onerror = null;
+    currentFile = null;
+    currentImage = null;
+    imageInput.value = '';
+    image.removeAttribute('src');
+    uploadSection.hidden = false;
+    cropSection.hidden = true;
+    headerActions.hidden = true;
+    window.alert('图片解码失败，请重新选择图片。');
+  };
+
+  image.src = imageUrl;
+  if (image.complete && image.naturalWidth && image.naturalHeight) {
+    initializeWhenLayoutIsReady();
+  }
+}
+
+function selectFullImage() {
+  if (!cropper) return;
+
+  const canvasData = cropper.getCanvasData();
+  if (
+    !Number.isFinite(canvasData.left)
+    || !Number.isFinite(canvasData.top)
+    || !Number.isFinite(canvasData.width)
+    || !Number.isFinite(canvasData.height)
+  ) {
+    return;
+  }
+
+  cropper.setCropBoxData({
+    left: canvasData.left,
+    top: canvasData.top,
+    width: canvasData.width,
+    height: canvasData.height,
+  });
+  syncCropSize(cropper.getData());
 }
 
 function initCropper() {
@@ -91,8 +185,8 @@ function initCropper() {
     viewMode: 1,
     dragMode: 'move',
     aspectRatio: NaN,
-    autoCropArea: 0.8,
-    restore: false,
+    autoCropArea: 1,
+    restore: true,
     guides: true,
     center: true,
     highlight: false,
@@ -100,10 +194,18 @@ function initCropper() {
     cropBoxResizable: true,
     toggleDragModeOnDblclick: false,
     ready() {
-      syncCropSize(cropper.getData());
+      selectFullImage();
     },
     crop(event) {
       scheduleCropSizeSync(event.detail);
+    },
+    cropend(event) {
+      if (cropResizeActions.has(event.detail.action)) {
+        scheduleCropCentering();
+      }
+    },
+    zoom() {
+      scheduleCropCentering();
     },
   });
 }
@@ -130,6 +232,59 @@ function syncCropSize(cropData) {
   } else {
     cropSizeBadge.textContent = `${width} × ${height} px`;
   }
+}
+
+function cancelPendingCropCentering() {
+  if (cropCenterFrame !== null) {
+    window.cancelAnimationFrame(cropCenterFrame);
+    cropCenterFrame = null;
+  }
+}
+
+function centerCropBoxAndCanvas(activeCropper) {
+  const containerData = activeCropper.getContainerData();
+  const cropBoxData = activeCropper.getCropBoxData();
+
+  if (
+    !Number.isFinite(containerData.width)
+    || !Number.isFinite(containerData.height)
+    || !Number.isFinite(cropBoxData.left)
+    || !Number.isFinite(cropBoxData.top)
+    || !Number.isFinite(cropBoxData.width)
+    || !Number.isFinite(cropBoxData.height)
+  ) {
+    return;
+  }
+
+  const centeredLeft = (containerData.width - cropBoxData.width) / 2;
+  const centeredTop = (containerData.height - cropBoxData.height) / 2;
+  const offsetX = centeredLeft - cropBoxData.left;
+  const offsetY = centeredTop - cropBoxData.top;
+
+  if (Math.abs(offsetX) < 0.5 && Math.abs(offsetY) < 0.5) return;
+
+  // Move the crop box and image canvas together so the selected image content
+  // stays unchanged while the crop frame returns to the visual center.
+  activeCropper.cropBoxData.left += offsetX;
+  activeCropper.cropBoxData.top += offsetY;
+  activeCropper.canvasData.left += offsetX;
+  activeCropper.canvasData.top += offsetY;
+  activeCropper.renderCanvas(true);
+  activeCropper.renderCropBox();
+  scheduleCropSizeSync(activeCropper.getData());
+}
+
+function scheduleCropCentering() {
+  if (!cropper) return;
+
+  cancelPendingCropCentering();
+  const activeCropper = cropper;
+  cropCenterFrame = window.requestAnimationFrame(() => {
+    cropCenterFrame = null;
+    if (cropper === activeCropper) {
+      centerCropBoxAndCanvas(activeCropper);
+    }
+  });
 }
 
 function setActiveRatioButton(activeButton) {
@@ -180,6 +335,7 @@ function activateFreeModePreservingCustomRatio() {
 }
 
 function selectCropMode(button, updateCropper = true) {
+  cancelPendingCropCentering();
   clearCustomRatioInputs();
   setActiveRatioButton(button);
 
@@ -268,6 +424,7 @@ function scheduleCustomRatioApply() {
 function applyCustomRatio() {
   if (!cropper) return false;
 
+  cancelPendingCropCentering();
   cancelPendingCustomRatioApply();
 
   const widthText = customRatioWidthInput.value.trim();
@@ -429,6 +586,7 @@ function resetCropMode() {
   selectedPreset = null;
   scaleX = 1;
   scaleY = 1;
+  cancelPendingCropCentering();
   clearCustomRatioInputs();
   cropModeLabel.textContent = '自由裁切';
   cropSizeBadge.textContent = '准备中';
