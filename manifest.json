@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "图片裁切工具",
-  "version": "1.1.0",
+  "version": "1.1.3",
   "description": "支持常见证件照尺寸并保持原图片格式的裁切工具",
   "action": {
     "default_popup": "popup.html",

@@ -52,6 +52,13 @@
           </div>
           <div class="workspace-tools">
             <div class="canvas-actions" aria-label="画面调整">
+              <button type="button" id="cropSpecsBtn" class="canvas-tool-button" aria-label="裁切规格" title="裁切规格" aria-haspopup="dialog" aria-expanded="false" aria-controls="cropSpecsMenu" disabled>
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path d="M8 4H4v4M16 4h4v4M20 16v4h-4M8 20H4v-4" />
+                  <rect x="7.5" y="8" width="9" height="8" rx="1.5" />
+                </svg>
+              </button>
+              <span class="canvas-tool-divider" aria-hidden="true"></span>
               <button type="button" id="rotateLeftBtn" class="canvas-tool-button" aria-label="左旋转" title="左旋转" disabled>
                 <svg class="btn-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                   <path d="M4 9V4m0 0h5M4 4l3.8 3.8A7 7 0 1 1 5.4 15" />
@@ -76,71 +83,20 @@
             <output id="cropSizeBadge" class="size-badge" aria-live="polite">未选择图片</output>
           </div>
         </div>
-        <div class="image-container" id="imageContainer" data-state="empty">
-          <div class="canvas-empty-state" id="canvasEmptyState" role="status" aria-live="polite">
-            <div class="canvas-empty-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none">
-                <rect x="3.5" y="4" width="17" height="16" rx="3" />
-                <path d="m6.5 16 3.8-4 3.1 3.1 1.8-1.9 2.3 2.4" />
-                <circle cx="15.8" cy="8.8" r="1.4" />
+
+        <div class="crop-specs-popover" id="cropSpecsMenu" role="dialog" aria-modal="false" aria-labelledby="cropSpecsTitle" hidden>
+          <header class="crop-specs-header">
+            <h2 id="cropSpecsTitle">裁切规格</h2>
+            <button type="button" class="crop-specs-close" id="cropSpecsCloseBtn" aria-label="关闭裁切规格">
+              <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="m7 7 10 10M17 7 7 17" />
               </svg>
-            </div>
-            <strong id="canvasEmptyStateTitle">还没有图片</strong>
-            <span id="canvasEmptyStateLabel">点击右上角“上传”选择 JPG、PNG 或 WebP</span>
-          </div>
-          <div class="cropper-stage">
-            <img id="image" alt="待裁切图片">
-          </div>
-        </div>
-      </div>
+            </button>
+          </header>
 
-      <div class="controls">
-        <section class="control-section" aria-labelledby="sizeSectionTitle">
-          <div class="section-heading">
-            <div>
-              <p class="section-kicker">SIZE &amp; RATIO</p>
-              <h2 id="sizeSectionTitle">裁切规格</h2>
-            </div>
-            <p>选择预设或自定义比例</p>
-          </div>
-
-          <div class="control-block">
-            <div class="label-row">
-              <h3>证件照尺寸</h3>
-              <span>按 300 DPI 换算</span>
-            </div>
-            <div class="btn-group preset-group">
-              <button type="button" class="btn btn-ratio" data-width="260" data-height="378" aria-pressed="false" disabled>
-                <span class="preset-name">小一寸</span>
-                <small>22×32 mm · 260×378 px</small>
-              </button>
-              <button type="button" class="btn btn-ratio" data-width="295" data-height="413" aria-pressed="false" disabled>
-                <span class="preset-name">一寸</span>
-                <small>25×35 mm · 295×413 px</small>
-              </button>
-              <button type="button" class="btn btn-ratio" data-width="390" data-height="567" aria-pressed="false" disabled>
-                <span class="preset-name">大一寸</span>
-                <small>33×48 mm · 390×567 px</small>
-              </button>
-              <button type="button" class="btn btn-ratio" data-width="413" data-height="531" aria-pressed="false" disabled>
-                <span class="preset-name">小二寸</span>
-                <small>35×45 mm · 413×531 px</small>
-              </button>
-              <button type="button" class="btn btn-ratio" data-width="413" data-height="579" aria-pressed="false" disabled>
-                <span class="preset-name">二寸</span>
-                <small>35×49 mm · 413×579 px</small>
-              </button>
-              <button type="button" class="btn btn-ratio" data-width="413" data-height="626" aria-pressed="false" disabled>
-                <span class="preset-name">大二寸</span>
-                <small>35×53 mm · 413×626 px</small>
-              </button>
-            </div>
-          </div>
-
-          <div class="control-block">
-            <div class="label-row">
-              <h3>常用比例</h3>
-              <span>自由裁切或快速比例</span>
+          <section class="crop-specs-section" aria-labelledby="commonRatiosTitle">
+            <div class="crop-specs-section-heading">
+              <h3 id="commonRatiosTitle">比例</h3>
             </div>
             <div class="btn-group ratio-presets">
               <button type="button" class="btn btn-ratio active" id="freeRatioButton" data-ratio="free" aria-pressed="true" disabled><span>自由</span></button>
@@ -148,16 +104,20 @@
               <button type="button" class="btn btn-ratio" data-ratio="1.3333333333" aria-pressed="false" disabled><span>4:3</span></button>
               <button type="button" class="btn btn-ratio" data-ratio="1.7777777778" aria-pressed="false" disabled><span>16:9</span></button>
             </div>
-          </div>
+          </section>
 
-          <div class="control-block fixed-ratio-block">
+          <section class="crop-specs-section fixed-ratio-section" aria-labelledby="fixedRatioTitle">
+            <div class="crop-specs-section-heading">
+              <h3 id="fixedRatioTitle">固定比例</h3>
+              <span>自动应用</span>
+            </div>
             <div class="fixed-ratio-row">
               <button type="button" class="btn btn-ratio ratio-mode-button" id="fixedRatioButton" data-ratio="fixed" aria-pressed="false" aria-controls="customRatioInputs" disabled>
                 <svg class="ratio-mode-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                   <rect x="6.5" y="10.5" width="11" height="9" rx="2" />
                   <path d="M9 10.5V8a3 3 0 0 1 6 0v2.5" />
                 </svg>
-                <span>固定比例</span>
+                <span>固定</span>
               </button>
               <div class="custom-ratio-inputs" id="customRatioInputs" aria-label="固定比例宽高">
                 <div class="custom-ratio-fields">
@@ -180,8 +140,58 @@
                 <p class="size-error" id="sizeError" role="alert" hidden></p>
               </div>
             </div>
+          </section>
+
+          <section class="crop-specs-section photo-size-section" aria-labelledby="photoSizesTitle">
+            <div class="crop-specs-section-heading">
+              <h3 id="photoSizesTitle">证件照</h3>
+              <span>300 DPI</span>
+            </div>
+            <div class="btn-group preset-group">
+              <button type="button" class="btn btn-ratio" data-width="260" data-height="378" aria-pressed="false" title="22×32 mm" disabled>
+                <span class="preset-name">小一寸</span>
+                <small>260×378 px</small>
+              </button>
+              <button type="button" class="btn btn-ratio" data-width="295" data-height="413" aria-pressed="false" title="25×35 mm" disabled>
+                <span class="preset-name">一寸</span>
+                <small>295×413 px</small>
+              </button>
+              <button type="button" class="btn btn-ratio" data-width="390" data-height="567" aria-pressed="false" title="33×48 mm" disabled>
+                <span class="preset-name">大一寸</span>
+                <small>390×567 px</small>
+              </button>
+              <button type="button" class="btn btn-ratio" data-width="413" data-height="531" aria-pressed="false" title="35×45 mm" disabled>
+                <span class="preset-name">小二寸</span>
+                <small>413×531 px</small>
+              </button>
+              <button type="button" class="btn btn-ratio" data-width="413" data-height="579" aria-pressed="false" title="35×49 mm" disabled>
+                <span class="preset-name">二寸</span>
+                <small>413×579 px</small>
+              </button>
+              <button type="button" class="btn btn-ratio" data-width="413" data-height="626" aria-pressed="false" title="35×53 mm" disabled>
+                <span class="preset-name">大二寸</span>
+                <small>413×626 px</small>
+              </button>
+            </div>
+          </section>
+        </div>
+
+        <div class="image-container" id="imageContainer" data-state="empty">
+          <div class="canvas-empty-state" id="canvasEmptyState" role="status" aria-live="polite">
+            <div class="canvas-empty-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none">
+                <rect x="3.5" y="4" width="17" height="16" rx="3" />
+                <path d="m6.5 16 3.8-4 3.1 3.1 1.8-1.9 2.3 2.4" />
+                <circle cx="15.8" cy="8.8" r="1.4" />
+              </svg>
+            </div>
+            <strong id="canvasEmptyStateTitle">还没有图片</strong>
+            <span id="canvasEmptyStateLabel">点击右上角“上传”选择 JPG、PNG 或 WebP</span>
           </div>
-        </section>
+          <div class="cropper-stage">
+            <img id="image" alt="待裁切图片">
+          </div>
+        </div>
       </div>
     </section>
   </main>

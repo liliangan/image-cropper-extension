@@ -32,12 +32,14 @@
 }
 
 html {
+  width: 600px;
+  min-width: 600px;
   background: var(--page);
 }
 
 body {
   width: 600px;
-  max-width: 100vw;
+  min-width: 600px;
   min-height: 400px;
   max-height: 600px;
   overflow-x: hidden;
@@ -145,6 +147,7 @@ button {
   font-weight: 700;
   letter-spacing: -0.03em;
   line-height: 1.2;
+  white-space: nowrap;
 }
 
 .header-actions {
@@ -152,6 +155,7 @@ button {
   align-items: center;
   flex: 0 0 auto;
   gap: 8px;
+  white-space: nowrap;
 }
 
 .crop-section {
@@ -161,8 +165,10 @@ button {
 }
 
 .workspace-card {
+  position: relative;
+  isolation: isolate;
   padding: 12px;
-  overflow: hidden;
+  overflow: visible;
   border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: var(--radius-lg);
   background: var(--canvas);
@@ -191,11 +197,20 @@ button {
 }
 
 .workspace-tools {
+  flex: 0 0 auto;
   gap: 9px;
 }
 
 .canvas-actions {
+  flex: 0 0 auto;
   gap: 4px;
+}
+
+.canvas-tool-divider {
+  width: 1px;
+  height: 18px;
+  margin: 0 3px;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .canvas-tool-button {
@@ -215,6 +230,12 @@ button {
 .canvas-tool-button:not(:disabled):hover {
   border-color: rgba(143, 150, 255, 0.48);
   background: rgba(143, 150, 255, 0.14);
+  color: #ffffff;
+}
+
+.canvas-tool-button[aria-expanded="true"] {
+  border-color: rgba(143, 150, 255, 0.58);
+  background: rgba(143, 150, 255, 0.18);
   color: #ffffff;
 }
 
@@ -241,6 +262,7 @@ button {
   color: #f7f8fc;
   font-size: 13px;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .size-badge {
@@ -256,6 +278,7 @@ button {
   font-size: 11px;
   font-variant-numeric: tabular-nums;
   line-height: 1;
+  white-space: nowrap;
 }
 
 .image-container {
@@ -347,75 +370,111 @@ button {
   object-fit: contain;
 }
 
-.controls {
-  overflow: hidden;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  background: var(--surface);
-  box-shadow: var(--shadow-sm);
+.crop-specs-popover {
+  position: absolute;
+  z-index: 20;
+  top: 54px;
+  right: 12px;
+  width: 350px;
+  max-height: calc(100vh - 132px);
+  padding: 10px;
+  overflow-y: auto;
+  border: 1px solid rgba(215, 219, 229, 0.96);
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow:
+    0 18px 44px rgba(7, 12, 24, 0.22),
+    0 3px 10px rgba(7, 12, 24, 0.09);
+  color: var(--text);
+  transform-origin: top right;
+  animation: crop-specs-enter 140ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.control-section {
-  padding: 18px;
-}
-
-.control-section + .control-section {
-  border-top: 1px solid var(--border);
-}
-
-.section-heading {
+.crop-specs-header,
+.crop-specs-section-heading {
   display: flex;
-  margin-bottom: 16px;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 20px;
+  align-items: center;
 }
 
-.section-heading h2 {
-  margin-top: 4px;
+.crop-specs-header {
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 0 8px 2px;
+}
+
+.crop-specs-close svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+.crop-specs-header h2 {
   color: var(--ink);
   font-family: "Avenir Next", "PingFang SC", "Microsoft YaHei", sans-serif;
-  font-size: 17px;
+  font-size: 13px;
   font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.25;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
 }
 
-.section-heading > p {
-  color: var(--muted-light);
-  font-size: 11px;
+.crop-specs-close {
+  display: grid;
+  flex: 0 0 24px;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease;
 }
 
-.compact-heading {
-  margin-bottom: 12px;
+.crop-specs-close:hover {
+  border-color: var(--border);
+  background: var(--surface-subtle);
+  color: var(--ink);
 }
 
-.control-block + .control-block {
-  margin-top: 16px;
+.crop-specs-close:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }
 
-.label-row {
-  display: flex;
-  margin-bottom: 8px;
-  align-items: center;
+.crop-specs-section {
+  padding-top: 8px;
+  border-top: 1px solid #eceef4;
+}
+
+.crop-specs-section + .crop-specs-section {
+  margin-top: 8px;
+}
+
+.crop-specs-section-heading {
+  margin-bottom: 5px;
   justify-content: space-between;
   gap: 12px;
 }
 
-.label-row h3 {
+.crop-specs-section-heading h3 {
   color: var(--ink-soft);
-  font-size: 12px;
-  font-weight: 700;
+  font-size: 10.5px;
+  font-weight: 650;
 }
 
-.label-row span {
+.crop-specs-section-heading span {
   color: var(--muted-light);
-  font-size: 10px;
+  font-size: 9px;
 }
 
 .btn-group {
   display: grid;
-  gap: 8px;
+  gap: 6px;
 }
 
 .preset-group {
@@ -426,15 +485,23 @@ button {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
-.control-block.fixed-ratio-block {
-  margin-top: 10px;
-}
-
 .fixed-ratio-row {
   display: grid;
   align-items: start;
-  grid-template-columns: minmax(112px, 0.85fr) minmax(0, 2.6fr);
-  gap: 8px;
+  grid-template-columns: 68px minmax(0, 1fr);
+  gap: 6px;
+}
+
+@keyframes crop-specs-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-3px) scale(0.99);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .btn {
@@ -530,6 +597,19 @@ button {
   color: var(--ink-soft);
 }
 
+.crop-specs-popover .btn-ratio {
+  border-color: #e2e5ed;
+  background: #fafbfe;
+}
+
+.crop-specs-popover .btn {
+  min-height: 34px;
+  padding: 5px 7px;
+  gap: 5px;
+  border-radius: 8px;
+  font-size: 11px;
+}
+
 .btn-ratio:not(:disabled):hover {
   border-color: #bfc4f7;
   background: #f4f4ff;
@@ -544,16 +624,43 @@ button {
   color: var(--primary);
 }
 
+.crop-specs-popover .ratio-presets {
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid #e5e8ef;
+  border-radius: 9px;
+  background: #f5f6fa;
+}
+
+.crop-specs-popover .ratio-presets .btn-ratio {
+  min-height: 30px;
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+
+.crop-specs-popover .ratio-presets .btn-ratio:not(:disabled):hover {
+  border-color: transparent;
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.crop-specs-popover .ratio-presets .btn-ratio.active,
+.crop-specs-popover .ratio-presets .btn-ratio[aria-pressed="true"] {
+  border-color: #d7d9ff;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(24, 32, 51, 0.1);
+}
+
 .preset-group .btn {
-  min-height: 54px;
-  padding: 8px 10px;
+  min-height: 40px;
+  padding: 4px 5px;
   flex-direction: column;
-  gap: 3px;
+  gap: 1px;
 }
 
 .preset-name {
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 11px;
+  font-weight: 650;
 }
 
 .preset-group small {
@@ -562,7 +669,7 @@ button {
   max-width: 100%;
   color: var(--muted);
   font-family: "SFMono-Regular", "Roboto Mono", Consolas, monospace;
-  font-size: 9px;
+  font-size: 8.5px;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
   line-height: 1.35;
@@ -577,10 +684,14 @@ button {
 
 .ratio-presets .btn,
 .fixed-ratio-row .btn {
-  padding: 8px 6px;
+  padding: 5px 6px;
   font-family: "SFMono-Regular", "Roboto Mono", Consolas, monospace;
-  font-size: 12px;
+  font-size: 10.5px;
   font-variant-numeric: tabular-nums;
+}
+
+.fixed-ratio-row > .btn {
+  min-height: 36px;
 }
 
 #freeRatioButton,
@@ -590,8 +701,8 @@ button {
 
 .ratio-mode-icon {
   flex: 0 0 auto;
-  width: 16px;
-  height: 16px;
+  width: 13px;
+  height: 13px;
   stroke: currentColor;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -612,8 +723,8 @@ button {
 .custom-ratio-fields {
   display: grid;
   align-items: center;
-  grid-template-columns: minmax(0, 1fr) 18px minmax(0, 1fr);
-  gap: 8px;
+  grid-template-columns: minmax(0, 1fr) 10px minmax(0, 1fr);
+  gap: 4px;
 }
 
 .custom-ratio-field {
@@ -621,20 +732,20 @@ button {
   min-width: 0;
   align-items: center;
   grid-template-columns: auto minmax(0, 1fr);
-  gap: 6px;
+  gap: 3px;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 650;
 }
 
 .number-input {
   display: flex;
-  height: 44px;
+  height: 36px;
   min-width: 0;
-  padding-right: 10px;
+  padding-right: 6px;
   align-items: center;
   border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
+  border-radius: 8px;
   background: #ffffff;
   transition: border-color 180ms ease, box-shadow 180ms ease;
 }
@@ -657,14 +768,14 @@ button {
   appearance: textfield;
   width: 100%;
   min-width: 0;
-  height: 42px;
-  padding: 0 4px 0 11px;
+  height: 34px;
+  padding: 0 2px 0 6px;
   border: 0;
   outline: 0;
   background: transparent;
   color: var(--ink);
   font-family: "SFMono-Regular", "Roboto Mono", Consolas, monospace;
-  font-size: 13px;
+  font-size: 11.5px;
   font-variant-numeric: tabular-nums;
   font-weight: 650;
 }
@@ -682,12 +793,12 @@ button {
 .number-input > span {
   color: var(--muted-light);
   font-family: "SFMono-Regular", "Roboto Mono", Consolas, monospace;
-  font-size: 10px;
+  font-size: 8.5px;
 }
 
 .size-separator {
   display: flex;
-  height: 44px;
+  height: 36px;
   align-items: center;
   justify-content: center;
   color: var(--muted-light);
@@ -696,7 +807,7 @@ button {
 
 .size-error {
   color: var(--danger);
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 600;
   line-height: 1.4;
 }
@@ -784,81 +895,6 @@ button {
   height: 32px;
   transform: translate(-50%, -50%);
   opacity: 0;
-}
-
-@media (max-width: 520px) {
-  .app-shell {
-    padding: 12px;
-  }
-
-  .app-header {
-    gap: 8px;
-  }
-
-  .brand {
-    gap: 8px;
-  }
-
-  .brand-mark {
-    flex-basis: 40px;
-    width: 40px;
-    height: 40px;
-  }
-
-  .brand-kicker {
-    display: none;
-  }
-
-  .brand h1 {
-    margin-top: 0;
-    font-size: 17px;
-  }
-
-  .header-actions {
-    gap: 6px;
-  }
-
-  .header-actions .btn {
-    min-height: 40px;
-    padding-inline: 8px;
-    gap: 5px;
-  }
-
-  .workspace-meta {
-    align-items: stretch;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .workspace-tools {
-    justify-content: space-between;
-  }
-
-  .control-section {
-    padding: 15px;
-  }
-
-  .section-heading > p,
-  .label-row span {
-    display: none;
-  }
-
-  .preset-group {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .ratio-presets {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-
-  .fixed-ratio-row {
-    grid-template-columns: 108px minmax(0, 1fr);
-  }
-
-  .custom-ratio-fields {
-    grid-template-columns: minmax(0, 1fr) 18px minmax(0, 1fr);
-  }
-
 }
 
 @media (hover: hover) and (pointer: fine) {

@@ -21,6 +21,9 @@ const canvasEmptyStateLabel = document.getElementById('canvasEmptyStateLabel');
 const downloadBtn = document.getElementById('downloadBtn');
 const downloadBtnLabel = document.getElementById('downloadBtnLabel');
 const uploadNewBtn = document.getElementById('uploadNewBtn');
+const cropSpecsBtn = document.getElementById('cropSpecsBtn');
+const cropSpecsMenu = document.getElementById('cropSpecsMenu');
+const cropSpecsCloseBtn = document.getElementById('cropSpecsCloseBtn');
 const rotateLeftBtn = document.getElementById('rotateLeftBtn');
 const rotateRightBtn = document.getElementById('rotateRightBtn');
 const flipHBtn = document.getElementById('flipHBtn');
@@ -35,7 +38,7 @@ const sizeError = document.getElementById('sizeError');
 const cropModeLabel = document.getElementById('cropModeLabel');
 const cropSizeBadge = document.getElementById('cropSizeBadge');
 const sizeInputs = [customRatioWidthInput, customRatioHeightInput];
-const canvasToolButtons = [rotateLeftBtn, rotateRightBtn, flipHBtn, flipVBtn];
+const canvasToolButtons = [cropSpecsBtn, rotateLeftBtn, rotateRightBtn, flipHBtn, flipVBtn];
 const cropResizeActions = new Set(['e', 'w', 's', 'n', 'ne', 'nw', 'se', 'sw']);
 
 function openImagePicker() {
@@ -44,6 +47,48 @@ function openImagePicker() {
 }
 
 uploadNewBtn.addEventListener('click', openImagePicker);
+
+function setCropSpecsMenuOpen(isOpen, restoreFocus = false) {
+  const shouldOpen = Boolean(isOpen && editorHasImage && !cropSpecsBtn.disabled);
+  cropSpecsMenu.hidden = !shouldOpen;
+  cropSpecsBtn.setAttribute('aria-expanded', String(shouldOpen));
+
+  if (shouldOpen) {
+    window.requestAnimationFrame(() => {
+      const activeOption = cropSpecsMenu.querySelector('.btn-ratio[aria-pressed="true"]:not(:disabled)');
+      (activeOption || freeRatioButton).focus();
+    });
+  } else if (restoreFocus && !cropSpecsBtn.disabled) {
+    cropSpecsBtn.focus();
+  }
+}
+
+cropSpecsBtn.addEventListener('click', () => {
+  setCropSpecsMenuOpen(cropSpecsMenu.hidden);
+});
+
+cropSpecsCloseBtn.addEventListener('click', () => {
+  setCropSpecsMenuOpen(false, true);
+});
+
+document.addEventListener('click', (event) => {
+  if (
+    cropSpecsMenu.hidden
+    || cropSpecsMenu.contains(event.target)
+    || cropSpecsBtn.contains(event.target)
+  ) {
+    return;
+  }
+
+  setCropSpecsMenuOpen(false);
+});
+
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && !cropSpecsMenu.hidden) {
+    event.preventDefault();
+    setCropSpecsMenuOpen(false, true);
+  }
+});
 
 imageInput.addEventListener('change', (event) => {
   const file = event.target.files[0];
@@ -104,6 +149,10 @@ function setEditorState(state) {
   editorHasImage = isReady;
   imageContainer.dataset.state = state;
   canvasEmptyState.hidden = isReady;
+
+  if (!isReady) {
+    setCropSpecsMenuOpen(false);
+  }
 
   const controlsDisabled = !isReady;
   canvasToolButtons.forEach((button) => {
@@ -443,6 +492,7 @@ ratioButtons.forEach((button) => {
     }
 
     selectCropMode(button);
+    setCropSpecsMenuOpen(false, true);
   });
 });
 
