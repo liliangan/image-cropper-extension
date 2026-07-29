@@ -9,6 +9,7 @@ import zlib
 VIEWBOX_SIZE = 128
 SAMPLE_GRID = 4
 ICON_SIZES = (16, 32, 48, 128)
+STORE_ICON_SIZE = 300
 
 
 def mix(start, end, amount):
@@ -137,6 +138,12 @@ def main():
         (output_directory / f"icon-{size}.png").write_bytes(icon_data)
         if size == 128:
             (output_directory / "icon.png").write_bytes(icon_data)
+
+    store_assets_directory = output_directory / "store-assets"
+    store_assets_directory.mkdir(exist_ok=True)
+    (store_assets_directory / "edge-logo-300.png").write_bytes(
+        render_icon(STORE_ICON_SIZE)
+    )
 
 
 if __name__ == "__main__":

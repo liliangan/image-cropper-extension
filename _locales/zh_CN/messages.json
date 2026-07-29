@@ -1,0 +1,10 @@
+{
+  "extensionName": {
+    "message": "图片裁切工具",
+    "description": "扩展在浏览器和扩展商店中显示的名称"
+  },
+  "extensionDescription": {
+    "message": "在浏览器本地裁切 JPG、JPEG、PNG 和 WebP 图片，支持常用比例、证件照尺寸、旋转、翻转并保持原格式导出",
+    "description": "扩展在浏览器和扩展商店中显示的简短说明"
+  }
+}

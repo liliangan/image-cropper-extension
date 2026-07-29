@@ -670,7 +670,7 @@ downloadBtn.addEventListener('click', () => {
     setDownloadState(false);
 
     if (!blob || blob.type !== mimeType) {
-      window.alert('当前浏览器无法保持该图片格式，请更换 Chrome 最新版或使用 JPG、PNG、WebP。');
+      window.alert('当前浏览器无法保持该图片格式，请升级浏览器或改用 JPG、PNG、WebP。');
       return;
     }
 
