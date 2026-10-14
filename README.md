@@ -2,7 +2,7 @@
 
 一个基于 Manifest V3 的 Edge / Chrome 图片裁切扩展。图片读取、裁切和导出均在浏览器本地完成，无需上传到服务器。
 
-当前版本：`1.0.0`
+当前版本：`1.2.0`
 
 本项目采用 [GNU Affero General Public License v3.0](LICENSE) 发布。完整源码、构建脚本和依赖清单均随仓库提供。
 
@@ -74,12 +74,6 @@ package_extension.sh       生成商店上传包
 ./package_extension.sh
 ```
 
-脚本会读取 `manifest.json` 中的版本号，校验 JavaScript 和清单格式，并生成：
-
-```text
-dist/image-cropper-extension-v1.0.0.zip
-```
-
 压缩包根目录直接包含 `manifest.json`，可用于 Microsoft Edge Add-ons 和 Chrome Web Store。每次商店更新都必须先把 `manifest.json` 的版本号调高；商店不允许覆盖同版本或降级发布。
 
 ## 隐私
@@ -105,17 +99,6 @@ dist/image-cropper-extension-v1.0.0.zip
 - 运行代码本地打包；模型首次使用时从官方地址下载并由浏览器缓存
 - 隐私政策和第三方许可声明
 - 可重复生成的 ZIP 发布包
-
-上架前仍需在商店后台准备或确认：
-
-- 开发者账号及身份/付款资料（以平台后台当前要求为准）
-- 无需登录即可访问的隐私政策、支持页面和联系信息
-- 至少一张清晰展示实际裁切界面的商店截图
-- Edge 所需的商店徽标/推广图，以及 Chrome 所需的商店图片素材
-- 分类、语言、适用市场、可见性和定价
-- 数据使用声明、单一用途说明及审核人员测试步骤
-
-图片尺寸和字段限制可能调整，提交时以 Edge Partner Center 与 Chrome Web Store 开发者后台显示的最新要求为准。不要在宣传图中使用 Edge、Chrome 或其他第三方商标来暗示官方背书。
 
 ## 第三方依赖
 
