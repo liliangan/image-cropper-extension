@@ -25,6 +25,7 @@ async function startCamera() {
     cameraStream = await navigator.mediaDevices.getUserMedia({ audio: false, video: true });
     cameraVideo.srcObject = cameraStream;
     await cameraVideo.play();
+    syncCameraPreviewSize();
     cameraPreview.classList.add('is-ready');
     setCameraControlsEnabled(true);
   } catch (error) {
@@ -59,6 +60,24 @@ function setCameraStatus(message) {
 function setCameraControlsEnabled(isEnabled) {
   captureCameraBtn.disabled = !isEnabled;
   countdownCameraBtn.disabled = !isEnabled;
+}
+
+/** 根据摄像头原始宽高调整预览框，确保预览展示完整视频而不发生拉伸或裁切。 */
+function syncCameraPreviewSize() {
+  if (!cameraVideo.videoWidth || !cameraVideo.videoHeight) {
+    return;
+  }
+
+  const pageHorizontalPadding = 48;
+  const availableWidth = Math.max(320, window.innerWidth - pageHorizontalPadding);
+  const availableHeight = Math.max(320, Math.floor(window.innerHeight * 0.72));
+  const scale = Math.min(
+    availableWidth / cameraVideo.videoWidth,
+    availableHeight / cameraVideo.videoHeight,
+  );
+
+  cameraPreview.style.width = `${Math.round(cameraVideo.videoWidth * scale)}px`;
+  cameraPreview.style.height = `${Math.round(cameraVideo.videoHeight * scale)}px`;
 }
 
 /** 停止摄像头流并释放硬件资源。 */
@@ -134,6 +153,8 @@ function saveCameraPhoto() {
     return;
   }
 
+  context.translate(canvas.width, 0);
+  context.scale(-1, 1);
   context.drawImage(
     cameraVideo,
     0,
@@ -206,5 +227,6 @@ captureCameraBtn.addEventListener('click', saveCameraPhoto);
 countdownCameraBtn.addEventListener('click', startCameraCountdown);
 closeCameraBtn.addEventListener('click', () => window.close());
 window.addEventListener('beforeunload', stopCameraStream);
+window.addEventListener('resize', syncCameraPreviewSize);
 
 startCamera();
