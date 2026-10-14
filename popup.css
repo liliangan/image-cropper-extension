@@ -32,14 +32,14 @@
 }
 
 html {
-  width: 600px;
-  min-width: 600px;
+  width: 680px;
+  min-width: 680px;
   background: var(--page);
 }
 
 body {
-  width: 600px;
-  min-width: 600px;
+  width: 680px;
+  min-width: 680px;
   min-height: 400px;
   max-height: 600px;
   overflow-x: hidden;
@@ -119,13 +119,12 @@ button {
   color: #ffffff;
 }
 
-.brand-mark svg {
-  width: 25px;
-  height: 25px;
-  stroke: currentColor;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 1.7;
+.brand-mark img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  object-fit: cover;
 }
 
 .brand-kicker,
@@ -162,6 +161,123 @@ button {
   display: flex;
   flex-direction: column;
   gap: 14px;
+}
+
+.background-removal-frame {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  border: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.id-photo-panel {
+  display: flex;
+  margin-top: 14px;
+  padding: 10px 12px;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.background-swatches {
+  display: flex;
+  align-items: center;
+}
+
+.text-tool-button {
+  min-height: 36px;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--ink-soft);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 650;
+  transition: border-color 180ms ease, background-color 180ms ease, color 180ms ease;
+}
+
+.text-tool-button {
+  margin-left: auto;
+  padding: 7px 10px;
+}
+
+.text-tool-button:not(:disabled):hover {
+  border-color: #bfc4f7;
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.text-tool-button:disabled,
+.background-swatch:disabled {
+  cursor: not-allowed;
+}
+
+.text-tool-button:disabled {
+  opacity: 0.52;
+}
+
+.text-tool-button:focus-visible,
+.background-swatch:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.id-photo-label {
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.background-swatches {
+  gap: 7px;
+}
+
+.background-swatch {
+  position: relative;
+  display: grid;
+  width: 24px;
+  height: 24px;
+  padding: 3px;
+  place-items: center;
+  border: 1px solid var(--border-strong);
+  border-radius: 50%;
+  background: #ffffff;
+}
+
+.background-swatch {
+  cursor: pointer;
+}
+
+.background-swatch span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 1px solid rgba(24, 32, 51, 0.1);
+  border-radius: 50%;
+}
+
+.background-swatch[data-background="#ffffff"] span {
+  background: #ffffff;
+}
+
+.background-swatch[data-background="#438edb"] span {
+  background: #438edb;
+}
+
+.background-swatch[data-background="#d8464f"] span {
+  background: #d8464f;
+}
+
+.background-swatch.active,
+.background-swatch[aria-pressed="true"] {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary-soft);
 }
 
 .workspace-card {
@@ -895,6 +1011,46 @@ button {
   height: 32px;
   transform: translate(-50%, -50%);
   opacity: 0;
+}
+
+/* 独立扩展页面应使用完整视口，工具栏弹窗仍由上方固定宽度规则约束。 */
+@media (min-width: 900px) {
+  html {
+    width: 100%;
+    min-width: 0;
+    min-height: 100%;
+  }
+
+  body {
+    width: 100%;
+    min-width: 0;
+    min-height: 100vh;
+    max-height: none;
+  }
+
+  .app-shell {
+    min-height: 100vh;
+    padding: 28px clamp(28px, 3vw, 56px) 40px;
+  }
+
+  .app-header {
+    margin-bottom: 22px;
+  }
+
+  .workspace-card {
+    padding: 16px;
+  }
+
+  .workspace-meta {
+    min-height: 48px;
+    padding: 2px 6px 12px;
+  }
+
+  .image-container {
+    height: min(70vh, 720px);
+    min-height: 480px;
+    padding: 16px;
+  }
 }
 
 @media (hover: hover) and (pointer: fine) {

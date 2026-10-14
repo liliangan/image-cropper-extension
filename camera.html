@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>拍摄证件照</title>
+  <link rel="stylesheet" href="camera.css">
+</head>
+<body>
+  <main class="camera-page">
+    <header class="camera-header">
+      <div>
+        <p>CAMERA</p>
+        <h1>拍摄证件照</h1>
+      </div>
+      <button type="button" id="closeCameraBtn" class="icon-button" aria-label="关闭拍照页" title="关闭">×</button>
+    </header>
+
+    <section class="camera-preview" id="cameraPreview" aria-label="摄像头预览">
+      <video id="cameraVideo" autoplay muted playsinline></video>
+      <div class="camera-guide" aria-hidden="true"></div>
+      <output class="camera-countdown" id="cameraCountdown" aria-live="assertive" hidden></output>
+      <p class="camera-status" id="cameraStatus" aria-live="polite">正在请求摄像头权限…</p>
+    </section>
+
+    <div class="camera-actions">
+      <button type="button" id="retryCameraBtn" class="secondary-button" hidden>重新请求权限</button>
+      <button type="button" id="captureCameraBtn" class="secondary-button" disabled>立即拍摄</button>
+      <button type="button" id="countdownCameraBtn" class="primary-button" disabled>延时 3 秒</button>
+    </div>
+  </main>
+  <script src="camera.js"></script>
+</body>
+</html>

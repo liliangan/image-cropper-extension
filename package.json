@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "@imgly/background-removal": "^1.7.0",
+    "onnxruntime-web": "^1.21.0"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2"
+  },
+  "scripts": {
+    "postinstall": "node scripts/prepare-background-removal.mjs",
+    "build": "node scripts/prepare-background-removal.mjs && esbuild popup.js background-removal-sandbox.js --bundle --format=esm --splitting --target=chrome109 --outdir=. --entry-names=[name].bundle --chunk-names=bundle.chunk-[hash] --legal-comments=none"
+  }
+}

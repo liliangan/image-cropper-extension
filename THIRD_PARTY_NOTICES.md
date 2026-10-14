@@ -1,5 +1,16 @@
 # Third-Party Notices
 
+## @imgly/background-removal 1.7.0
+
+Project: https://github.com/imgly/background-removal-js
+
+License: GNU Affero General Public License v3.0 (AGPL-3.0). The complete
+license text is provided in the repository root as `LICENSE`.
+
+The package uses ONNX Runtime Web, ISNet, lodash-es, ndarray and zod. Their
+attributions and licenses are documented in the package's
+`ThirdPartyLicenses.json` file and corresponding upstream packages.
+
 ## Cropper.js 1.6.1
 
 Project: https://github.com/fengyuanchen/cropperjs
